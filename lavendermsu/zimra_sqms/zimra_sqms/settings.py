@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,7 +47,7 @@ INSTALLED_APPS = [
     # Local apps
     'core',
     'bookings',
-    'queue',
+    'waiting_queues',
     'notifications',
     'dashboard',
     'reports',
@@ -73,7 +74,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+                'django.contrib.messages.context_processors.messages'
             ],
         },
     },
@@ -148,7 +149,7 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 # Custom user model
-AUTH_USER_MODEL = 'zimra_sqms.User'
+AUTH_USER_MODEL = 'core.User'
 
 # Channels configuration
 CHANNEL_LAYERS = {

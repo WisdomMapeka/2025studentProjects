@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from core.models import Branch, Service
 
 class Report(models.Model):
