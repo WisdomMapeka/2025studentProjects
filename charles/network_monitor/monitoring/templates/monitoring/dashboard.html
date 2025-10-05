@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Network Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Network Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <button class="btn btn-sm btn-outline-secondary" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Total Devices
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_devices }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-server fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Devices Up
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ up_devices }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Warning
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ warning_devices }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            Devices Down
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ down_devices }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Devices Grid -->
+<div class="row">
+    {% for device in devices %}
+    <div class="col-xl-4 col-md-6 mb-4">
+        <div class="card device-card h-100 shadow">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">{{ device.name }}</h6>
+                <span class="badge bg-{% if device.status == 'up' %}success{% elif device.status == 'down' %}danger{% elif device.status == 'warning' %}warning{% else %}secondary{% endif %}">
+                    {{ device.status|upper }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            {{ device.device_type.name }}
+                        </div>
+                        <div class="h6 mb-0 font-weight-bold text-gray-800">
+                            <i class="fas fa-network-wired"></i> {{ device.ip_address }}
+                        </div>
+                        {% if device.response_time %}
+                        <div class="text-xs text-muted">
+                            Response: {{ device.response_time }} ms
+                        </div>
+                        {% endif %}
+                        {% if device.location %}
+                        <div class="text-xs text-muted">
+                            <i class="fas fa-map-marker-alt"></i> {{ device.location }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-{% if device.device_type.name == 'Router' %}router{% elif device.device_type.name == 'Switch' %}sitemap{% else %}server{% endif %} fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <small class="text-muted">
+                    Last checked: 
+                    {% if device.last_checked %}
+                        {{ device.last_checked|timesince }} ago
+                    {% else %}
+                        Never
+                    {% endif %}
+                </small>
+                <a href="{% url 'device_detail' device.id %}" class="btn btn-sm btn-outline-primary float-end">
+                    Details
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> No devices configured. 
+            <a href="{% url 'device_management' %}" class="alert-link">Add some devices</a> to start monitoring.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="m-0 font-weight-bold text-primary">Recent Activity</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Device</th>
+                                <th>Status</th>
+                                <th>Response Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for history in recent_history %}
+                            <tr>
+                                <td>{{ history.timestamp|timesince }} ago</td>
+                                <td>{{ history.device.name }}</td>
+                                <td>
+                                    <span class="badge bg-{% if history.status == 'up' %}success{% elif history.status == 'down' %}danger{% elif history.status == 'warning' %}warning{% else %}secondary{% endif %}">
+                                        {{ history.status|upper }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if history.response_time %}
+                                        {{ history.response_time }} ms
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No activity recorded yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function refreshDashboard() {
+    // Simple page reload for now - could be enhanced with AJAX
+    location.reload();
+}
+
+// Auto-refresh every 60 seconds
+setTimeout(refreshDashboard, 60000);
+</script>
+{% endblock %}
