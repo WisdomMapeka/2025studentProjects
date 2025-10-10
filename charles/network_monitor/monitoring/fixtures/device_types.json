@@ -1,0 +1,6 @@
+[
+  {"model": "monitoring.devicetype", "pk": 1, "fields": {"name": "Router", "description": "Gateway/edge router"}},
+  {"model": "monitoring.devicetype", "pk": 2, "fields": {"name": "Switch", "description": "Layer 2/3 switch"}},
+  {"model": "monitoring.devicetype", "pk": 3, "fields": {"name": "Server", "description": "Application or file server"}},
+  {"model": "monitoring.devicetype", "pk": 4, "fields": {"name": "Access Point", "description": "Wireless AP"}}
+]

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ device.name }} - Device Details{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 class="h2">{{ device.name }} Details</h1>
+  <a href="{% url 'dashboard' %}" class="btn btn-sm btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+</div>
+
+<div class="row">
+  <!-- Left: Device Info -->
+  <div class="col-lg-5 mb-4">
+    <div class="card shadow">
+      <div class="card-header bg-primary text-white">
+        <strong>Device Information</strong>
+      </div>
+      <div class="card-body">
+        <p><strong>Type:</strong> {{ device.device_type.name }}</p>
+        <p><strong>IP Address:</strong> {{ device.ip_address }}</p>
+        {% if device.mac_address %}
+        <p><strong>MAC Address:</strong> {{ device.mac_address }}</p>
+        {% endif %}
+        {% if device.location %}
+        <p><strong>Location:</strong> {{ device.location }}</p>
+        {% endif %}
+        <p><strong>Status:</strong>
+          <span class="badge bg-{% if device.status == 'up' %}success{% elif device.status == 'down' %}danger{% elif device.status == 'warning' %}warning{% else %}secondary{% endif %}">
+            {{ device.status|upper }}
+          </span>
+        </p>
+        <p><strong>Response Time:</strong>
+          {% if device.response_time %}{{ device.response_time }} ms{% else %}-{% endif %}
+        </p>
+        <p><strong>Last Checked:</strong>
+          {% if device.last_checked %}{{ device.last_checked|date:"Y-m-d H:i:s" }}{% else %}Never{% endif %}
+        </p>
+        <p><strong>Monitoring Interval:</strong> {{ device.monitoring_interval }} seconds</p>
+        <p><strong>SNMP Enabled:</strong>
+          {% if device.use_snmp %}
+            <span class="text-success fw-bold">Yes</span>
+          {% else %}
+            <span class="text-muted">No</span>
+          {% endif %}
+        </p>
+
+        <div class="mt-3 d-grid">
+          <button class="btn btn-outline-primary" id="btnCheckNow">
+            <i class="fas fa-sync-alt"></i> Check Device Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Uptime Statistics -->
+  <div class="col-lg-7 mb-4">
+    <div class="card shadow">
+      <div class="card-header bg-secondary text-white">
+        <strong>Uptime Statistics (Last 7 Days)</strong>
+      </div>
+      <div class="card-body">
+        <p>
+          <strong>Total Checks:</strong> {{ total_checks }} <br>
+          <strong>Uptime:</strong> {{ uptime_percentage }}%
+        </p>
+
+        <canvas id="uptimeChart" height="150"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Status History -->
+<div class="card shadow mb-4">
+  <div class="card-header bg-light">
+    <strong>Recent Status History</strong>
+  </div>
+  <div class="card-body table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Status</th>
+          <th>Response Time (ms)</th>
+          <th>Extra Info</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in history %}
+        <tr>
+          <td>{{ h.timestamp|date:"Y-m-d H:i:s" }}</td>
+          <td>
+            <span class="badge bg-{% if h.status == 'up' %}success{% elif h.status == 'down' %}danger{% elif h.status == 'warning' %}warning{% else %}secondary{% endif %}">
+              {{ h.status|upper }}
+            </span>
+          </td>
+          <td>{% if h.response_time %}{{ h.response_time }}{% else %}-{% endif %}</td>
+          <td>
+            {% if h.additional_info.uptime %}
+              <small>Uptime: {{ h.additional_info.uptime }}</small><br>
+            {% endif %}
+            {% if h.additional_info.cpu_usage %}
+              <small>CPU: {{ h.additional_info.cpu_usage }}%</small>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="text-center">No recent history available.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Prepare uptime data for chart
+  const historyLabels = [{% for h in history %}"{{ h.timestamp|date:'M d, H:i' }}",{% endfor %}];
+  const statusValues = [{% for h in history %}
+      {% if h.status == 'up' %}100
+      {% elif h.status == 'warning' %}50
+      {% else %}0{% endif %},
+    {% endfor %}];
+
+  const ctx = document.getElementById('uptimeChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: historyLabels.reverse(),
+        datasets: [{
+          label: 'Uptime Status',
+          data: statusValues.reverse(),
+          borderColor: '#1A76D1',
+          fill: false,
+          tension: 0.1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            min: 0,
+            max: 100,
+            title: { display: true, text: 'Uptime (%)' }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
+
+  // Manual device check (AJAX)
+  document.getElementById('btnCheckNow').addEventListener('click', function() {
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+    fetch("{% url 'api_check_device' device.id %}")
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.success) {
+          alert(`Device Status: ${data.status.toUpperCase()}`);
+          location.reload();
+        } else {
+          alert(`Error: ${data.error}`);
+        }
+      })
+      .catch(err => alert('Error: ' + err))
+      .finally(() => {
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-sync-alt"></i> Check Device Now';
+      });
+  });
+</script>
+{% endblock %}

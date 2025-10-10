@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Device Management{% endblock %}
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom d-flex align-items-center justify-content-between">
+  <h1 class="h2">Device Management</h1>
+  {% if editing %}
+    <a class="btn btn-sm btn-outline-secondary" href="{% url 'device_management' %}">+ New Device</a>
+  {% endif %}
+</div>
+
+<div class="row">
+  <div class="col-lg-5">
+    <div class="card shadow mb-4">
+      <div class="card-header"><strong>{% if editing %}Edit{% else %}Add{% endif %} Device</strong></div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+          {{ form|crispy }}
+          <button class="btn btn-primary" type="submit">{% if editing %}Update{% else %}Add{% endif %} Device</button>
+          {% if editing %}
+            <a href="{% url 'device_management' %}" class="btn btn-secondary">Cancel</a>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card shadow">
+      <div class="card-header"><strong>Devices</strong></div>
+      <div class="card-body table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr><th>Name</th><th>IP</th><th>Type</th><th>Status</th><th>Interval</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for d in devices %}
+            <tr>
+              <td>{{ d.name }}</td>
+              <td>{{ d.ip_address }}</td>
+              <td>{{ d.device_type.name }}</td>
+              <td>
+                <span class="badge bg-{% if d.status == 'up' %}success{% elif d.status == 'down' %}danger{% elif d.status == 'warning' %}warning{% else %}secondary{% endif %}">
+                  {{ d.status|upper }}
+                </span>
+              </td>
+              <td>{{ d.monitoring_interval }}s</td>
+              <td class="text-end">
+                <a href="{% url 'device_management' %}?edit={{ d.id }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <form method="post" class="d-inline" onsubmit="return confirm('Delete {{ d.name }}?');">
+                  {% csrf_token %}
+                  <input type="hidden" name="delete_id" value="{{ d.id }}">
+                  <button class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+                <a href="{% url 'device_detail' d.id %}" class="btn btn-sm btn-outline-secondary">Details</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">No devices yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

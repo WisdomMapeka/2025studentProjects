@@ -27,7 +27,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', RedirectView.as_view(pattern_name='dashboard', permanent=False)),
-    path('monitoring/', include('monitoring.urls')),
+    path('', include('monitoring.urls')),
     path('alerts/', include('alerts.urls')),
     path('reports/', include('reports.urls')),
     path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),

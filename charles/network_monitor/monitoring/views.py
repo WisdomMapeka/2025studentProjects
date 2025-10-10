@@ -98,19 +98,36 @@ def api_check_device(request, device_id):
             'error': str(e)
         })
 
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .forms import NetworkDeviceForm
+
 @login_required
 def device_management(request):
-    """Device management interface"""
-    devices = NetworkDevice.objects.all()
-    device_types = DeviceType.objects.all()
-    
-    if request.method == 'POST':
-        # Handle device creation/editing (simplified)
-        pass
-    
-    context = {
-        'devices': devices,
-        'device_types': device_types,
-    }
-    
-    return render(request, 'monitoring/device_management.html', context)
+    """Create/update devices on one page (simple CRUD)."""
+    editing_id = request.GET.get("edit")
+    instance = None
+    if editing_id:
+        instance = get_object_or_404(NetworkDevice, id=editing_id)
+
+    if request.method == "POST":
+        if request.POST.get("delete_id"):
+            obj = get_object_or_404(NetworkDevice, id=request.POST["delete_id"])
+            obj.delete()
+            messages.success(request, f"Deleted {obj.name}.")
+            return redirect("device_management")
+
+        form = NetworkDeviceForm(request.POST, instance=instance)
+        if form.is_valid():
+            obj = form.save()
+            messages.success(request, f"Saved {obj.name}.")
+            return redirect("device_management")
+        else:
+            messages.error(request, "Please fix the errors below.")
+    else:
+        form = NetworkDeviceForm(instance=instance)
+
+    devices = NetworkDevice.objects.all().select_related("device_type")
+    return render(request, "monitoring/device_management.html", {"form": form, "devices": devices, "editing": instance})

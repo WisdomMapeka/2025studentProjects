@@ -139,3 +139,29 @@ import os
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+# --- Email defaults used by AlertManager ---
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+ADMIN_EMAIL = "alerts@example.com"  # change to your admin/team email list
+
+# --- Static ---
+STATIC_URL = "/static/"
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+
+# --- Celery/Beat schedule ---
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 60
+
+from datetime import timedelta
+CELERY_BEAT_SCHEDULE = {
+    # Every minute, decide which devices are “due” based on their per-device interval
+    "monitoring-tick": {
+        "task": "monitoring.tasks.tick_monitoring",
+        "schedule": timedelta(minutes=1),
+    },
+}

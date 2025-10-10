@@ -1,5 +1,6 @@
-"""URL configuration for monitoring app"""
 from django.urls import path
 from . import views
 
-urlpatterns = []
+urlpatterns = [
+    path("uptime/csv/", views.uptime_csv, name="uptime_csv"),
+]

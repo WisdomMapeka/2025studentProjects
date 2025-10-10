@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Alerts{% endblock %}
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom d-flex align-items-center justify-content-between">
+  <h1 class="h2">Alerts</h1>
+</div>
+
+<div class="card shadow">
+  <div class="card-body table-responsive">
+    <table class="table table-sm align-middle">
+      <thead>
+      <tr>
+        <th>Time</th><th>Device</th><th>Severity</th><th>Status</th><th>Message</th><th>Metric</th><th></th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for a in alerts %}
+      <tr>
+        <td>{{ a.triggered_at }}</td>
+        <td>{{ a.device.name }}</td>
+        <td><span class="badge bg-{% if a.severity == 'critical' %}danger{% elif a.severity == 'high' %}warning{% elif a.severity == 'medium' %}info{% else %}secondary{% endif %}">
+          {{ a.severity|upper }}
+        </span></td>
+        <td>{{ a.status }}</td>
+        <td>{{ a.message }}</td>
+        <td>{% if a.metric_value %}{{ a.metric_value }}{% else %}-{% endif %}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'alert_ack' a.id %}">Acknowledge</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'alert_resolve' a.id %}">Resolve</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center">No alerts.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
