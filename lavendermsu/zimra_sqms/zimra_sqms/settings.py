@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'notifications',
     'dashboard',
     'reports',
+    'django_extensions',
+    
 ]
 
 MIDDLEWARE = [
@@ -183,10 +185,16 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 # EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 # Login URLs
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGIN_URL = '/accounts/login/'
-LOGOUT_REDIRECT_URL = '/'
+SIGNUP_REDIRECT_URL = "/"
+LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login'
 
 # Session configuration
 SESSION_COOKIE_AGE = 3600  # 1 hour
 SESSION_SAVE_EVERY_REQUEST = True
+
+AUTHENTICATION_BACKENDS = [
+    'core.auth_backend.EmailBackend',   # custom email backend
+    'django.contrib.auth.backends.ModelBackend',  # fallback (optional)
+]

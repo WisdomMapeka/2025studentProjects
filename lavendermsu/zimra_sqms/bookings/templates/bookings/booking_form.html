@@ -1,0 +1,19 @@
+{% include "header.html" %}
+{% load crispy_forms_tags %}
+<div class="container">
+  <div class="card shadow-lg border-0">
+    <div class="card-header bg-primary text-white">
+      <h4>Book a Service</h4>
+    </div>
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary mt-3">Book Now</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
