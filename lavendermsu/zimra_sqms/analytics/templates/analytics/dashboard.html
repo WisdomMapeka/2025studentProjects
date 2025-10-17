@@ -1,0 +1,204 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Analytics Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    .kpi-card { border-radius: 1rem; }
+    .kpi-value { font-size: 2rem; font-weight: 700; }
+    .kpi-sub { color:#6c757d; font-size: .9rem; }
+  </style>
+</head>
+<body class="bg-light">
+<div class="container-fluid py-4">
+  <h1 class="mb-3">Analytics Dashboard</h1>
+
+  <form method="get" class="row g-3 mb-4">
+    <div class="col-sm-3">
+      <label class="form-label">Start date</label>
+      {{ form.start_date }}
+    </div>
+    <div class="col-sm-3">
+      <label class="form-label">End date</label>
+      {{ form.end_date }}
+    </div>
+    <div class="col-sm-3">
+      <label class="form-label">Branch</label>
+      {{ form.branch }}
+    </div>
+    <div class="col-sm-3">
+      <label class="form-label">Service</label>
+      {{ form.service }}
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary">Apply Filters</button>
+      <a class="btn btn-outline-secondary" href="?">Reset</a>
+      <a class="btn btn-success" href="{% url 'analytics:export_csv' %}?{{ request.GET.urlencode }}">Export CSV</a>
+      <a class="btn btn-outline-success" href="{% url 'analytics:export_xlsx' %}?{{ request.GET.urlencode }}">Export Excel</a>
+    </div>
+  </form>
+
+  <!-- KPI cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-2">
+      <div class="card kpi-card shadow-sm">
+        <div class="card-body">
+          <div class="kpi-sub">Total Bookings</div>
+          <div class="kpi-value">{{ kpi.total }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card kpi-card shadow-sm">
+        <div class="card-body">
+          <div class="kpi-sub">Completed</div>
+          <div class="kpi-value">{{ kpi.completed }}</div>
+          <div class="kpi-sub">{{ kpi.completion_rate }}% completion</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card kpi-card shadow-sm">
+        <div class="card-body">
+          <div class="kpi-sub">Avg Wait (min)</div>
+          <div class="kpi-value">{{ kpi.avg_wait }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card kpi-card shadow-sm">
+        <div class="card-body">
+          <div class="kpi-sub">Avg Service (min)</div>
+          <div class="kpi-value">{{ kpi.avg_service }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card kpi-card shadow-sm">
+        <div class="card-body">
+          <div class="kpi-sub">Cancel Rate</div>
+          <div class="kpi-value">{{ kpi.cancel_rate }}%</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-2">
+      <div class="card kpi-card shadow-sm">
+        <div class="card-body">
+          <div class="kpi-sub">No-Show Rate</div>
+          <div class="kpi-value">{{ kpi.no_show_rate }}%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="row g-4">
+    <div class="col-12 col-xl-6">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Bookings Trend</div>
+        <div class="card-body">
+          <canvas id="bookingsTrend"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-6">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Status Distribution</div>
+        <div class="card-body">
+          <canvas id="statusPie"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Branch Comparison (Top 10)</div>
+        <div class="card-body">
+          <canvas id="branchBar"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-xl-6">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Hourly Heatmap</div>
+        <div class="card-body">
+          <canvas id="heatmap"></canvas>
+          <small class="text-muted d-block mt-2">Counts of bookings per hour in the selected window.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Top Services</div>
+        <div class="card-body table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr><th>#</th><th>Service</th><th>Bookings</th></tr>
+            </thead>
+            <tbody>
+              {% for row in top_services %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ row.service }}</td>
+                <td>{{ row.count }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="3" class="text-center text-muted">No data</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const tsLabels = {{ ts.labels|safe }};
+const tsData = {{ ts.data|safe }};
+new Chart(document.getElementById('bookingsTrend'), {
+  type: 'line',
+  data: { labels: tsLabels, datasets: [{ label: 'Bookings', data: tsData, tension: .3, fill: false }] },
+  options: { responsive: true, maintainAspectRatio: false }
+});
+
+const statusData = (function(){
+  const raw = {{ status|safe }};
+  const labels = Object.keys(raw);
+  const data = Object.values(raw);
+  return { labels, data };
+})();
+new Chart(document.getElementById('statusPie'), {
+  type: 'pie',
+  data: { labels: statusData.labels, datasets: [{ data: statusData.data }] },
+  options: { responsive: true, maintainAspectRatio: false }
+});
+
+const branchLabels = {{ branches.labels|safe }};
+const branchCounts = {{ branches.data|safe }};
+new Chart(document.getElementById('branchBar'), {
+  type: 'bar',
+  data: { labels: branchLabels, datasets: [{ label: 'Bookings', data: branchCounts }] },
+  options: { responsive: true, maintainAspectRatio: false }
+});
+
+// Heatmap-esque: we’ll use a bar chart per hour (simple & effective)
+const heatLabels = {{ heat.labels|safe }};
+const heatData = {{ heat.data|safe }};
+new Chart(document.getElementById('heatmap'), {
+  type: 'bar',
+  data: { labels: heatLabels, datasets: [{ label: 'Bookings per Hour', data: heatData }] },
+  options: { responsive: true, maintainAspectRatio: false }
+});
+</script>
+</body>
+</html>

@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'dashboard',
     'reports',
     'django_extensions',
+    'analytics',
     
 ]
 
