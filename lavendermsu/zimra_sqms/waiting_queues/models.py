@@ -13,7 +13,9 @@ class WaitingQueue(models.Model):
     
     booking = models.OneToOneField(Booking, on_delete=models.CASCADE)
     counter = models.ForeignKey(Counter, on_delete=models.SET_NULL, null=True, blank=True)
-    queue_number = models.PositiveIntegerField()
+    queue_number = models.IntegerField(default=0)
+    booked_date = models.DateField(blank=True, null=True)
+    booked_time = models.TimeField(blank=True, null=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='waiting')
     called_time = models.DateTimeField(null=True, blank=True)
     serving_start_time = models.DateTimeField(null=True, blank=True)

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import uuid
 
 class User(AbstractUser):
     USER_TYPE_CHOICES = (
@@ -9,6 +10,7 @@ class User(AbstractUser):
     )
 
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='citizen', blank=True, null=True)
+    tin = models.CharField(max_length=20, blank=True, null=True, unique=True)
     phone_number = models.CharField(max_length=15, blank=True)
     id_number = models.CharField(max_length=20, blank=True)
     email = models.EmailField(unique=True, null=True, blank=True)
@@ -23,6 +25,29 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
+    
+    def save(self, *args, **kwargs):
+        if not self.tin:
+            self.tin = self.generate_unique_tin()
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def generate_unique_tin():
+        """
+        Generates a unique Tax Identification Number (TIN)
+        Format example: TIN-20251024-AB12C3
+        """
+        import random, string
+        from django.utils import timezone
+        date_part = timezone.now().strftime("%Y%m%d")
+        random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        tin_candidate = f"TIN-{date_part}-{random_part}"
+
+        # Ensure it's unique
+        while User.objects.filter(tin=tin_candidate).exists():
+            random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+            tin_candidate = f"TIN-{date_part}-{random_part}"
+        return tin_candidate
 
 
 

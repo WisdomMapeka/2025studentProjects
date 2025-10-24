@@ -46,3 +46,9 @@ foreach ($app in $apps) {
     dot -Tpng "diagrams\$app.dot" -o "diagrams\$app.png"
 }
 Write-Host "✅ Done! ERDs saved in /diagrams/"
+
+
+# Test
+
+python manage.py test bookings
+python manage.py test bookings -v 2

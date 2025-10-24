@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from core.models import User, Service, Branch
 import uuid
 
+
 class Booking(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Pending'),
@@ -28,10 +29,12 @@ class Booking(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', blank=True, null=True)
     priority = models.CharField(max_length=20, choices=PRIORITY_CHOICES, default='normal', blank=True, null=True)
     special_requirements = models.TextField(blank=True, null=True)
-    token_number = models.CharField(max_length=10, blank=True, null=True)
+    token_number = models.CharField(max_length=50, blank=True, null=True)
     estimated_wait_time = models.PositiveIntegerField(default=0, help_text="Estimated wait time in minutes")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
     
     class Meta:
         ordering = ['booking_date', 'booking_time']
@@ -42,7 +45,32 @@ class Booking(models.Model):
     
     def __str__(self):
         return f"Booking {self.token_number} - {self.citizen.username}"
+    
+    def save(self, *args, **kwargs):
+        if not self.token_number:
+            self.token_number = self.generate_unique_token()
 
+        super().save(*args, **kwargs)
+
+
+    @staticmethod
+    def generate_unique_token():
+        """
+        Generates a unique Tax Identification Number (TIN)
+        Format example: TIN-20251024-AB12C3
+        """
+        import random, string
+        from django.utils import timezone
+        date_part = timezone.now().strftime("%Y%m%d")
+        random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+        token_number = f"TOKEN-{date_part}-{random_part}"
+
+        # Ensure it's unique
+        while Booking.objects.filter(token_number=token_number).exists():
+            random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
+            token_number = f"TOKEN-{date_part}-{random_part}"
+        return token_number
+    
 class TimeSlot(models.Model):
     branch = models.ForeignKey(Branch, on_delete=models.CASCADE, blank=True, null=True)
     service = models.ForeignKey(Service, on_delete=models.CASCADE, blank=True, null=True)

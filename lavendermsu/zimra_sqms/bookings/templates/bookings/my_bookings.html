@@ -1,7 +1,9 @@
-{% include "header.html" %}
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
 
+{% block title %}My Bookings{% endblock %}
 
+{% block content %}
 <div class="container mb-5">
 
   <!-- Table Section -->
@@ -15,7 +17,7 @@
         <table class="table table-hover align-middle mb-0" id="bookingTable">
           <thead class="table-light">
             <tr>
-              <th>#</th><th>Service</th><th>Branch</th><th>Date</th>
+              <th>#</th><th>Token</th><th>Service</th><th>Branch</th><th>Date</th>
               <th>Time</th><th>Status</th><th>Actions</th>
             </tr>
           </thead>
@@ -23,6 +25,7 @@
             {% for booking in bookings %}
             <tr id="row-{{ booking.id }}">
               <td>{{ forloop.counter }}</td>
+              <td>{{ booking.token_number }}</td>
               <td>{{ booking.service }}</td>
               <td>{{ booking.branch }}</td>
               <td>{{ booking.booking_date }}</td>
@@ -127,3 +130,4 @@ $(function() {
 </script>
 </body>
 </html>
+{%  endblock %}

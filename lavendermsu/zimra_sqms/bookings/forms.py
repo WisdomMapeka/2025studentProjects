@@ -8,7 +8,7 @@ class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
         fields = [
-            'citizen', 'service', 'branch', 'booking_date', 'booking_time',
+            'service', 'branch', 'booking_date', 'booking_time',
             'priority', 'special_requirements'
         ]
         widgets = {

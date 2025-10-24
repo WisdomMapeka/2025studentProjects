@@ -162,6 +162,7 @@ def export_csv(request):
 def export_xlsx(request):
     # Optional: Excel export (requires openpyxl)
     from openpyxl import Workbook
+    from django.utils import timezone
     form = AnalyticsFilterForm(request.GET or None)
     
     # Safe way to get filters

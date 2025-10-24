@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Queue List{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Waiting Queue</h2>
+
+    <!-- Filter Form -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select name="status" class="form-select">
+                <option value="all">All</option>
+                <option value="waiting">Waiting</option>
+                <option value="called">Called</option>
+                <option value="serving">Serving</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Counter</label>
+            <select name="counter" class="form-select">
+                <option value="all">All</option>
+                {% for counter in counters %}
+                    <option value="{{ counter.id }}">{{ counter.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="start_date" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label">End Date</label>
+            <input type="date" name="end_date" class="form-control">
+        </div>
+
+        <div class="col-md-12 mt-3">
+            <button class="btn btn-primary" type="submit">Filter</button>
+            <a href="{% url 'queue_list' %}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+
+    <!-- Queue Table -->
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Queue #</th>
+                <th>Booking</th>
+                <th>Counter</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for queue in queues %}
+            <tr>
+                <td>{{ queue.queue_number }}</td>
+                <td>{{ queue.booking.token_number }}</td>
+                <td>{{ queue.counter }}</td>
+                <td>
+                    <span class="badge 
+                        {% if queue.status == 'waiting' %}bg-warning
+                        {% elif queue.status == 'called' %}bg-info
+                        {% elif queue.status == 'serving' %}bg-primary
+                        {% elif queue.status == 'completed' %}bg-success
+                        {% elif queue.status == 'cancelled' %}bg-danger
+                        {% endif %}">
+                        {{ queue.get_status_display }}
+                    </span>
+                </td>
+                <td>{{ queue.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    <a href="{% url 'queue_detail' queue.pk %}" class="btn btn-sm btn-outline-info">View Details</a>
+                    
+                    {% if queue.status == 'waiting' or queue.status == 'called' %}
+                        <a href="{% url 'start_serving' queue.pk %}" class="btn btn-sm btn-primary">
+                            Start Serving
+                        </a>
+                    {% endif %}
+
+                    {% if queue.status != 'completed' %}
+                    <a href="{% url 'mark_as_done' queue.pk %}" class="btn btn-sm btn-success">Mark as Done</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">No queues found.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
