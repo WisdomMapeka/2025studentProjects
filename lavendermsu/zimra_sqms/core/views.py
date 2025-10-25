@@ -9,7 +9,7 @@ def signup_view(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Account created successfully! You can now log in.")
-            return redirect('login')  # or 'booking_create'
+            return redirect('/login/')  # or 'booking_create'
     else:
         form = UserRegistrationForm()
     return render(request, 'users/signup.html', {'form': form})

@@ -3,6 +3,10 @@ from django.db.models import Q
 from django.utils import timezone
 from .models import WaitingQueue
 from core.models import Counter
+from .send_notifications import send_custom_email
+from notifications.models import Notification, NotificationTemplate
+from bookings.models import Booking
+
 
 def queue_list(request):
     queues = WaitingQueue.objects.all().select_related('booking', 'counter')
@@ -45,11 +49,76 @@ def mark_as_done(request, pk):
     queue.service_duration = int((timezone.now() - queue.serving_start_time).total_seconds() / 60)
     queue.serving_end_time = timezone.now()
     queue.save()
+
+    booking = queue.booking
+    booking.status = 'completed'
+    booking.save()
+
+    try:
+        subject = "Service Completed"
+        message = f"Dear {queue.booking.citizen.first_name}, your service for booking {queue.booking.token_number} has been completed. Thank you for visiting."
+        recipient_list = [queue.booking.citizen.email]
+        send_custom_email(subject, message, recipient_list)
+
+        Notification.objects.create(
+            user=queue.booking.citizen,
+            booking=queue.booking,
+            notification_type='email',
+            category='service_completion',
+            subject=subject,
+            message=message,
+            delivered=True
+        )
+    except Exception as e:
+        Notification.objects.create(
+            user=queue.booking.citizen,
+            booking=queue.booking,
+            notification_type='email',
+            category='service_completion',
+            subject=subject,
+            message=message,
+            delivered=False
+        )
+        print(f"Failed to send completion email: {e}")
+    
     return redirect('queue_list')
 
 def start_serving(request, pk):
     queue = get_object_or_404(WaitingQueue, pk=pk)
     queue.status = 'serving'
+    queue.called_time = timezone.now()
     queue.serving_start_time = timezone.now()
     queue.save()
+
+    booking = queue.booking
+    booking.status = 'serving'
+    booking.save()
+
+    try:
+        subject = "You are being served"
+        message = f"Dear {queue.booking.citizen.first_name}, you are now being served for your booking {queue.booking.token_number}."
+        recipient_list = [queue.booking.citizen.email]
+        send_custom_email(subject, message, recipient_list)
+
+        Notification.objects.create(
+            user=queue.booking.citizen,
+            booking=queue.booking,
+            notification_type='email',
+            category='serving',
+            subject=subject,
+            message=message,
+            delivered=True
+        )
+    except Exception as e:
+        Notification.objects.create(
+            user=queue.booking.citizen,
+            booking=queue.booking,
+            notification_type='email',
+            category='serving',
+            subject=subject,
+            message=message,
+            delivered=False
+        )
+        print(f"Failed to send serving email: {e}")
+
     return redirect('queue_list')

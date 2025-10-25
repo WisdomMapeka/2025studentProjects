@@ -4,14 +4,12 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Queue {{ queue.queue_number }} Details</h2>
+    <h2>Queue {{ queue.booking.token_number }} Details</h2>
     <div class="card mt-3">
         <div class="card-body">
             <p><strong>Booking Token:</strong> {{ queue.booking.token_number }}</p>
-            <p><strong>Counter:</strong> {{ queue.counter }}</p>
             <p><strong>Status:</strong> {{ queue.get_status_display }}</p>
             <p><strong>Created At:</strong> {{ queue.created_at }}</p>
-            <p><strong>Wait Duration:</strong> {{ queue.wait_duration }} minutes</p>
             <p><strong>Service Duration:</strong> {{ queue.service_duration }} minutes</p>
             <p><strong>Called Time:</strong> {{ queue.called_time }}</p>
             <p><strong>Serving Start:</strong> {{ queue.serving_start_time }}</p>

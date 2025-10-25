@@ -23,8 +23,3 @@ class BranchAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'phone_number', 'active')
     list_filter = ('active',)
     search_fields = ('name', 'address')
-
-@admin.register(Counter)
-class CounterAdmin(admin.ModelAdmin):
-    list_display = ('branch', 'number', 'service', 'active')
-    list_filter = ('branch', 'service', 'active')

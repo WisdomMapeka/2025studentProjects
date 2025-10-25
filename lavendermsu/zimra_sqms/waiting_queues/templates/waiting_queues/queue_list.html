@@ -21,16 +21,7 @@
             </select>
         </div>
 
-        <div class="col-md-3">
-            <label class="form-label">Counter</label>
-            <select name="counter" class="form-select">
-                <option value="all">All</option>
-                {% for counter in counters %}
-                    <option value="{{ counter.id }}">{{ counter.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
+        
         <div class="col-md-3">
             <label class="form-label">Start Date</label>
             <input type="date" name="start_date" class="form-control">
@@ -51,9 +42,7 @@
     <table class="table table-striped table-hover">
         <thead class="table-dark">
             <tr>
-                <th>Queue #</th>
                 <th>Booking</th>
-                <th>Counter</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Action</th>
@@ -62,9 +51,7 @@
         <tbody>
             {% for queue in queues %}
             <tr>
-                <td>{{ queue.queue_number }}</td>
                 <td>{{ queue.booking.token_number }}</td>
-                <td>{{ queue.counter }}</td>
                 <td>
                     <span class="badge 
                         {% if queue.status == 'waiting' %}bg-warning

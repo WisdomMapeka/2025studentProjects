@@ -11,6 +11,7 @@ class Notification(models.Model):
     
     NOTIFICATION_CATEGORIES = (
         ('booking_confirmation', 'Booking Confirmation'),
+        ('serving', 'serving'),
         ('reminder', 'Reminder'),
         ('queue_update', 'Queue Update'),
         ('service_completion', 'Service Completion'),

@@ -27,20 +27,3 @@ class BookingAdmin(admin.ModelAdmin):
     )
     ordering = ("booking_date", "booking_time")
     readonly_fields = ("created_at", "updated_at")
-
-
-@admin.register(TimeSlot)
-class TimeSlotAdmin(admin.ModelAdmin):
-    list_display = (
-        "branch",
-        "service",
-        "date",
-        "start_time",
-        "end_time",
-        "max_capacity",
-        "booked_count",
-        "available",
-    )
-    list_filter = ("branch", "service", "date", "available")
-    search_fields = ("branch__name", "service__name", "date")
-    ordering = ("date", "start_time")

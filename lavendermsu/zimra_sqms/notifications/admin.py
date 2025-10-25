@@ -31,15 +31,3 @@ class NotificationAdmin(admin.ModelAdmin):
     ordering = ("-sent_at",)
     readonly_fields = ("sent_at",)
 
-
-@admin.register(NotificationTemplate)
-class NotificationTemplateAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "category",
-        "notification_type",
-        "active",
-    )
-    list_filter = ("notification_type", "category", "active")
-    search_fields = ("name", "subject_template", "message_template")
-    ordering = ("name",)

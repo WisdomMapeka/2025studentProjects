@@ -11,7 +11,7 @@ class UserRegistrationForm(UserCreationForm):
         fields = [
             'username', 'first_name', 'last_name', 'email',
             'phone_number', 'id_number', 'date_of_birth', 'address',
-            'user_type', 'password1', 'password2'
+            'password1', 'password2'
         ]
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
