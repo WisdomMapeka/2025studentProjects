@@ -30,6 +30,8 @@ urlpatterns = [
     path('', include('monitoring.urls')),
     path('alerts/', include('alerts.urls')),
     path('reports/', include('reports.urls')),
-    path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='/'), name='logout'),
+    path('accounts/login/', admin.site.urls),
+    # path('', RedirectView.as_view(pattern_name='dashboard', permanent=False)),
+    # path('accounts/login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('accounts/logout/', admin.site.urls),
 ]

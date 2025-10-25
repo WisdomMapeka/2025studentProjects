@@ -131,3 +131,15 @@ def device_management(request):
 
     devices = NetworkDevice.objects.all().select_related("device_type")
     return render(request, "monitoring/device_management.html", {"form": form, "devices": devices, "editing": instance})
+
+
+
+
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def logout_view(request):
+    """Logs out the user and redirects to login page."""
+    logout(request)
+    return redirect('/') 

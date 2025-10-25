@@ -50,5 +50,8 @@ Write-Host "✅ Done! ERDs saved in /diagrams/"
 
 # Test
 
-python manage.py test bookings
-python manage.py test bookings -v 2
+# Run specific test case
+python manage.py test bookings.tests.BookingModelTest
+
+# Run specific test method
+python manage.py test bookings.tests.BookingModelTest.test_token_number_generation
