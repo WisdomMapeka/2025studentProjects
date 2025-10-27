@@ -1,5 +1,7 @@
 """
-Database models for network monitoring.
+Author: SNMS Development Team
+
+Description : Database models for network monitoring.
 Explanation: These models represent network devices, their status history,
 and monitoring configurations.
 """
