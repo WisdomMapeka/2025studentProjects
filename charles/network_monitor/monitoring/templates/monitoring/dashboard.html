@@ -204,10 +204,39 @@
 <script>
 function refreshDashboard() {
     // Simple page reload for now - could be enhanced with AJAX
+
+
+
+
+
+    fetch('/check_all_devices/', {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not OK');
+        }
+        return response.json(); // assuming your Django view returns JsonResponse
+    })
+    .then(data => {
+        console.log('Devices checked:', data);
+        // You can update the dashboard dynamically here
+        // Example:
+        // document.getElementById('status').innerText = data.status_message;
+    })
+    .catch(error => {
+        console.error('Error checking devices:', error);
+    });
+
+
     location.reload();
+
 }
 
 // Auto-refresh every 60 seconds
-setTimeout(refreshDashboard, 60000);
+setTimeout(refreshDashboard, 6000);
 </script>
 {% endblock %}

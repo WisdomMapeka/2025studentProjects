@@ -99,6 +99,28 @@ def api_check_device(request, device_id):
         })
 
 
+def check_all_devices(request):
+    """Function to check status of all devices (could be called by a scheduler)"""
+    devices = NetworkDevice.objects.filter(is_active=True)
+    for device in devices:
+        try:
+            status, info = NetworkMonitor.check_device_status(device)
+            # Log status history
+            DeviceStatusHistory.objects.create(
+                device=device,
+                status=status,
+                additional_info=info
+            )
+        except Exception as e:
+            # Log error in status history
+            DeviceStatusHistory.objects.create(
+                device=device,
+                status='error',
+                additional_info=str(e)
+            )
+    status = "All devices are online"
+    return JsonResponse({'status_message': status})
+
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
