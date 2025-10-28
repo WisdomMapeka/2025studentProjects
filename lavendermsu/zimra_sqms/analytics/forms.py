@@ -1,19 +1,39 @@
 from django import forms
-from core.models import Branch, Service
-from django.utils import timezone
+from bookings.models import Booking
 
 class AnalyticsFilterForm(forms.Form):
-    start_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    end_date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))
-    branch = forms.ModelChoiceField(queryset=Branch.objects.filter(active=True), required=False)
-    service = forms.ModelChoiceField(queryset=Service.objects.filter(active=True), required=False)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        start_date = cleaned_data.get('start_date')
-        end_date = cleaned_data.get('end_date')
+    start_date = forms.DateField(
+        required=False, 
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    end_date = forms.DateField(
+        required=False, 
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
+    )
+    branch = forms.ChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    service = forms.ChoiceField(
+        required=False,
+        choices=[],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
-        if start_date and end_date and start_date > end_date:
-            self.add_error('start_date', 'Start date cannot be after end date.')
+        # Dynamically populate branch choices
+        branch_choices = [('', 'All Branches')] + [
+            (branch.id, branch.name) for branch in 
+            Booking.objects.values_list('branch', flat=True).exclude(branch__isnull=True).distinct()
+        ]
+        self.fields['branch'].choices = branch_choices
         
-        return cleaned_data
+        # Dynamically populate service choices
+        service_choices = [('', 'All Services')] + [
+            (service.id, service.name) for service in 
+            Booking.objects.values_list('service', flat=True).exclude(service__isnull=True).distinct()
+        ]
+        self.fields['service'].choices = service_choices

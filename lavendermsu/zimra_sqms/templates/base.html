@@ -62,7 +62,14 @@
                                 <a class="nav-link" href="{% url 'queue_list' %}">queue_list</a>
                             </li>
                             
-                    {% endif %} 
+                    {% elif user.is_staff %} 
+                           <li class="nav-item">
+                                <a class="nav-link" href="{% url 'queue_list' %}">queue_list</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'queue_list' %}">Queue List</a>
+                            </li>
+                    {% endif %}
                      
                 </ul>
                 

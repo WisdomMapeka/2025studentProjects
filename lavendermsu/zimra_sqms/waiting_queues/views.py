@@ -3,10 +3,9 @@ from django.db.models import Q
 from django.utils import timezone
 from .models import WaitingQueue
 from core.models import Counter
-from .send_notifications import send_custom_email
+from .send_notifications import send_custom_email, send_sms_via_api
 from notifications.models import Notification, NotificationTemplate
 from bookings.models import Booking
-
 
 def queue_list(request):
     queues = WaitingQueue.objects.all().select_related('booking', 'counter')
@@ -53,32 +52,19 @@ def mark_as_done(request, pk):
     booking = queue.booking
     booking.status = 'completed'
     booking.save()
+    subject = "Service Completed"
+    message = f"Dear {queue.booking.citizen.first_name}, your service for booking {queue.booking.token_number} has been completed. Thank you for visiting."
+    category='service_completion'
 
     try:
-        subject = "Service Completed"
-        message = f"Dear {queue.booking.citizen.first_name}, your service for booking {queue.booking.token_number} has been completed. Thank you for visiting."
-        recipient_list = [queue.booking.citizen.email]
-        send_custom_email(subject, message, recipient_list)
-
-        Notification.objects.create(
-            user=queue.booking.citizen,
-            booking=queue.booking,
-            notification_type='email',
-            category='service_completion',
-            subject=subject,
-            message=message,
-            delivered=True
-        )
+        send_sms_via_api(queue.booking.citizen.phone_number, message, queue, category)
     except Exception as e:
-        Notification.objects.create(
-            user=queue.booking.citizen,
-            booking=queue.booking,
-            notification_type='email',
-            category='service_completion',
-            subject=subject,
-            message=message,
-            delivered=False
-        )
+        print(f"Failed to send SMS: {e}")
+
+    try:
+        recipient_list = [queue.booking.citizen.email]
+        send_custom_email(subject, message, recipient_list, queue, category)
+    except Exception as e:
         print(f"Failed to send completion email: {e}")
     
     return redirect('queue_list')
@@ -93,32 +79,18 @@ def start_serving(request, pk):
     booking = queue.booking
     booking.status = 'serving'
     booking.save()
+    subject = "You are being served"
+    message = f"Dear {queue.booking.citizen.first_name}, you are now being served for your booking {queue.booking.token_number}."
+    category='serving'
+    try:
+        send_sms_via_api(queue.booking.citizen.phone_number, message, queue, category)
+    except Exception as e:
+        print(f"Failed to send SMS: {e}")
 
     try:
-        subject = "You are being served"
-        message = f"Dear {queue.booking.citizen.first_name}, you are now being served for your booking {queue.booking.token_number}."
         recipient_list = [queue.booking.citizen.email]
-        send_custom_email(subject, message, recipient_list)
-
-        Notification.objects.create(
-            user=queue.booking.citizen,
-            booking=queue.booking,
-            notification_type='email',
-            category='serving',
-            subject=subject,
-            message=message,
-            delivered=True
-        )
+        send_custom_email(subject, message, recipient_list, queue, category)
     except Exception as e:
-        Notification.objects.create(
-            user=queue.booking.citizen,
-            booking=queue.booking,
-            notification_type='email',
-            category='serving',
-            subject=subject,
-            message=message,
-            delivered=False
-        )
         print(f"Failed to send serving email: {e}")
 
     return redirect('queue_list')

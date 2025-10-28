@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Booking Lookup</h2>
+
+  {% if error %}
+    <div class="alert alert-danger text-center">{{ error }}</div>
+  {% elif booking %}
+    <div class="card shadow p-4">
+      <h5>Booking Details</h5>
+      <p><strong>Token:</strong> {{ booking.token_number }}</p>
+      <p><strong>Status:</strong> {{ booking.status|title }}</p>
+      <p><strong>Service:</strong> {{ booking.service.name }}</p>
+      <p><strong>Branch:</strong> {{ booking.branch.name }}</p>
+      <p><strong>Booking Date:</strong> {{ booking.booking_date }}</p>
+      <p><strong>Booking Time:</strong> {{ booking.booking_time }}</p>
+      <hr>
+      {% if queue_info %}
+        <h5>Queue Details</h5>
+        <p><strong>Status:</strong> {{ queue_info.status|title }}</p>
+      {% else %}
+        <p class="text-muted">No queue information available yet.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

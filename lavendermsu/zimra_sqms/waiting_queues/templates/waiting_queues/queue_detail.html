@@ -1,22 +1,58 @@
 {% extends "base.html" %}
 
-{% block title %}Queue Details{% endblock %}
+{% block title %}Queue Details - {{ queue.booking.token_number }}{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Queue {{ queue.booking.token_number }} Details</h2>
-    <div class="card mt-3">
+    <h2 class="mb-4 text-center">Queue Details - {{ queue.booking.token_number }}</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Booking Information</h5>
+        </div>
         <div class="card-body">
             <p><strong>Booking Token:</strong> {{ queue.booking.token_number }}</p>
-            <p><strong>Status:</strong> {{ queue.get_status_display }}</p>
-            <p><strong>Created At:</strong> {{ queue.created_at }}</p>
-            <p><strong>Service Duration:</strong> {{ queue.service_duration }} minutes</p>
-            <p><strong>Called Time:</strong> {{ queue.called_time }}</p>
-            <p><strong>Serving Start:</strong> {{ queue.serving_start_time }}</p>
-            <p><strong>Serving End:</strong> {{ queue.serving_end_time }}</p>
-
-            <a href="{% url 'queue_list' %}" class="btn btn-secondary mt-3">Back to List</a>
+            <p><strong>Citizen:</strong> {{ queue.booking.citizen.username }}</p>
+            <p><strong>Service:</strong> {{ queue.booking.service.name }}</p>
+            <p><strong>Branch:</strong> {{ queue.booking.branch.name }}</p>
+            <p><strong>Booking Date:</strong> {{ queue.booking.booking_date }}</p>
+            <p><strong>Booking Time:</strong> {{ queue.booking.booking_time }}</p>
+            <p><strong>Status:</strong> {{ queue.booking.get_status_display }}</p>
+            <p><strong>Priority:</strong> {{ queue.booking.get_priority_display }}</p>
+            <p><strong>Special Requirements:</strong> {{ queue.booking.special_requirements|default:"None" }}</p>
+            <p><strong>Estimated Wait Time:</strong> {{ queue.booking.estimated_wait_time }} minutes</p>
+            <p><strong>Created At:</strong> {{ queue.booking.created_at }}</p>
+            <p><strong>Last Updated:</strong> {{ queue.booking.updated_at }}</p>
         </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Queue Information</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Queue Token:</strong> {{ queue.booking.token_number }}</p>
+            <p><strong>Status:</strong> {{ queue.get_status_display }}</p>
+            <p><strong>Booked Date:</strong> {{ queue.booked_date }}</p>
+            <p><strong>Booked Time:</strong> {{ queue.booked_time }}</p>
+            <p><strong>Service Duration:</strong> {{ queue.service_duration }} minutes</p>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Timing Details</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Called Time:</strong> {{ queue.called_time|default:"Not yet called" }}</p>
+            <p><strong>Serving Start Time:</strong> {{ queue.serving_start_time|default:"Not started" }}</p>
+            <p><strong>Serving End Time:</strong> {{ queue.serving_end_time|default:"Not ended" }}</p>
+            <p><strong>Created At:</strong> {{ queue.created_at }}</p>
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'queue_list' %}" class="btn btn-secondary">Back to List</a>
     </div>
 </div>
 {% endblock %}

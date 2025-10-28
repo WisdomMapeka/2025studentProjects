@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'reports',
     'django_extensions',
     'analytics',
+    'audittrail.apps.AudittrailConfig',
     
 ]
 
@@ -62,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'audittrail.middleware.VisitorTrackingMiddleware',
 ]
 
 ROOT_URLCONF = 'zimra_sqms.urls'
@@ -200,3 +202,6 @@ AUTHENTICATION_BACKENDS = [
     'core.auth_backend.EmailBackend',   # custom email backend
     'django.contrib.auth.backends.ModelBackend',  # fallback (optional)
 ]
+
+SMS_API_TOKEN=os.getenv('SMS_TOKEN')
+SMS_SENDER_ID=os.getenv('SMS_SENDER')

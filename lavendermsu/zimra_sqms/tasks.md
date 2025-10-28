@@ -1,0 +1,12 @@
+System Changes
+- Default Login - Homepage to be Bookings Page [done]
+- When sending notifications, Error message to logged/ recorded in Notifications Table
+- Waiting Queue Interface - Display all details of a queue item [done]
+- Start service notification error??
+- ID number field to be mandatory - add place holder with ID number format  [done]
+- Create Supervisor by default 
+- Staff account should see Queue List and Dashboard [done]
+- System users IDs to start with unique SIDs not TINs [done]
+- A page to view booking details based on token TIN
+- Dedicated Home Page for Log out users fairly designed [done]
+- Audit trail

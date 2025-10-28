@@ -8,6 +8,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Booking
 from .forms import BookingForm
 
+from waiting_queues.models import WaitingQueue
 
 # ✅ 1. Booking Form Page
 @login_required
@@ -81,5 +82,41 @@ def booking_edit_view(request, pk):
     form = BookingForm(instance=booking)
     html = render(request, 'bookings/partials/edit_form.html', {'form': form, 'booking': booking}).content.decode('utf-8')
     return JsonResponse({'form_html': html})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def booking_lookup(request):
+    token = request.GET.get('token')
+    booking = None
+    queue_info = None
+    error = None
+
+    if token:
+        try:
+            booking = Booking.objects.get(token_number=token)
+            queue_info = WaitingQueue.objects.filter(booking=booking).first()
+        except Booking.DoesNotExist:
+            error = "No booking found with that token number."
+
+    context = {
+        'booking': booking,
+        'queue_info': queue_info,
+        'error': error
+    }
+    return render(request, 'bookings/booking_lookup.html', context)
 
 

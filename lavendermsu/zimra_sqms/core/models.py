@@ -1,6 +1,10 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
 import uuid
+import random
+import string
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
+
 
 class User(AbstractUser):
     USER_TYPE_CHOICES = (
@@ -11,12 +15,12 @@ class User(AbstractUser):
 
     user_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default='citizen', blank=True, null=True)
     tin = models.CharField(max_length=20, blank=True, null=True, unique=True)
-    phone_number = models.CharField(max_length=15, blank=True)
-    id_number = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(unique=True, null=True, blank=True)
+    phone_number = models.CharField(max_length=15, help_text="Include country code, e.g., 263777123123")
+    id_number = models.CharField(max_length=20, default='id-num', help_text="National ID or Passport Number eg 22-88888z33")
+    email = models.EmailField(unique=True, default='user@g.com')
     date_of_birth = models.DateField(null=True, blank=True)
     address = models.TextField(blank=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)  # 🆕
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -25,29 +29,42 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.get_user_type_display()})"
-    
+
     def save(self, *args, **kwargs):
         if not self.tin:
-            self.tin = self.generate_unique_tin()
+            self.tin = self.generate_unique_tin(self)
         super().save(*args, **kwargs)
 
     @staticmethod
-    def generate_unique_tin():
+    def generate_unique_tin(user=None):
         """
-        Generates a unique Tax Identification Number (TIN)
-        Format example: TIN-20251024-AB12C3
+        Generates a unique identifier for a user.
+        - Citizens get a TIN (Tax Identification Number)
+        - Staff, Superusers, and Admins get an SID (Staff Identification Number)
+        Format examples:
+          TIN-20251028-AB12C3
+          SID-20251028-XY89Z0
         """
-        import random, string
-        from django.utils import timezone
+
+        # Determine prefix
+        if user and (user.is_staff or user.is_superuser or user.user_type in ['staff', 'admin']):
+            prefix = "SID"
+        else:
+            prefix = "TIN"
+
+        # Generate date + random part
         date_part = timezone.now().strftime("%Y%m%d")
         random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-        tin_candidate = f"TIN-{date_part}-{random_part}"
+        code_candidate = f"{prefix}-{date_part}-{random_part}"
 
-        # Ensure it's unique
-        while User.objects.filter(tin=tin_candidate).exists():
+        # Ensure uniqueness
+        while User.objects.filter(tin=code_candidate).exists():
             random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5))
-            tin_candidate = f"TIN-{date_part}-{random_part}"
-        return tin_candidate
+            code_candidate = f"{prefix}-{date_part}-{random_part}"
+
+        return code_candidate
+
+
 
 
 

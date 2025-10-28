@@ -3,6 +3,11 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserRegistrationForm
 
+def index_view(request):
+    if request.user.is_authenticated:
+        return redirect("my_bookings")
+    return render(request, 'core/index.html')
+ 
 def signup_view(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)

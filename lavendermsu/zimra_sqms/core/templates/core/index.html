@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home - SQMS</title>
+
+  <!-- Bootstrap & jQuery -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+  <style>
+    /* === Base Styling === */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #004e92, #000428);
+      color: #fff;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === Navbar === */
+    .navbar {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .navbar-brand {
+      font-weight: bold;
+      font-size: 1.4rem;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-link {
+      color: #e0e0e0 !important;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: #ffffff !important;
+      transform: scale(1.05);
+    }
+
+    /* === Container === */
+    .container-home {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      margin: 40px auto;
+      max-width: 700px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1.2s ease-in-out;
+    }
+
+    .container-home h1 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .container-home p {
+      font-size: 1.2rem;
+      color: #dcdcdc;
+      margin-bottom: 35px;
+      font-weight: 300;
+    }
+
+    .btn-start {
+      background-color: #00c6ff;
+      color: #fff;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1rem;
+      border-radius: 25px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-start:hover {
+      background-color: #0072ff;
+      transform: scale(1.05);
+    }
+
+    /* === Animation === */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* === Profile Image (if used later) === */
+    .profile-img {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #0d6efd;
+    }
+
+    /* === Responsive === */
+    @media (max-width: 600px) {
+      .container-home h1 {
+        font-size: 2rem;
+      }
+
+      .container-home p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"> ZIMRA SQMS </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link active" href="{% url 'booking_create' %}">Book Service</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'my_bookings' %}">My Bookings</a></li>
+
+          {% if user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'profile' %}">Profile</a></li>
+            <li class="nav-item">
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="btn btn-outline-light ms-2" type="submit">Logout</button>
+              </form>
+            </li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{% url 'booking_create' %}">Login</a></li>
+            <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Sign Up</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Home Content -->
+  <div class="container-home">
+    <h1>Welcome to the SQMS System</h1>
+    <p>Book your service and relax — we’ll handle the rest.</p>
+    <a href="{% url 'booking_create' %}" class="btn-start">Book Now</a>
+
+    <!-- Booking ID lookup -->
+    <div class="mt-4">
+      <h5 class="mb-3">Check Your Booking Status</h5>
+      <form method="get" action="{% url 'booking_lookup' %}" class="d-flex justify-content-center">
+        <input 
+          type="text" 
+          name="token" 
+          class="form-control w-50 me-2"
+          placeholder="Enter Booking ID (e.g. TOKEN-20251024-AB12C3)" 
+          required
+        >
+        <button type="submit" class="btn btn-info text-white">Check</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

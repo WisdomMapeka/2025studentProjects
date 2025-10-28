@@ -9,4 +9,5 @@ urlpatterns = [
     # AJAX endpoints
     path('my-bookings/<uuid:pk>/cancel/', views.booking_cancel_view, name='booking_cancel'),
     path('my-bookings/<uuid:pk>/edit/', views.booking_edit_view, name='booking_edit'),
+    path('booking-lookup/', views.booking_lookup, name='booking_lookup'),
 ]
