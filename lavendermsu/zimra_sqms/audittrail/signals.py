@@ -1,7 +1,8 @@
 # audittrail/signals.py
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.dispatch import receiver
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from core.models import User
 from .models import AuditTrail
 
 def get_client_ip(request):
