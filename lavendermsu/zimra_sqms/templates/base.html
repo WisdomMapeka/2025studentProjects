@@ -59,15 +59,15 @@
                                 <a class="nav-link" href="{% url 'admin:index' %}">Dashboard</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'queue_list' %}">queue_list</a>
+                                <a class="nav-link" href="{% url 'queue_list' %}">queue list</a>
                             </li>
                             
                     {% elif user.is_staff %} 
                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'queue_list' %}">queue_list</a>
+                                <a class="nav-link" href="{% url 'queue_list' %}">queue list</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'queue_list' %}">Queue List</a>
+                                <a class="nav-link" href="{% url 'admin:index' %}">Dashboard</a>
                             </li>
                     {% endif %}
                      
