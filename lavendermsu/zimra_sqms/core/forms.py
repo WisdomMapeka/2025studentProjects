@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Row, Column
 from .models import User
+from django.core.exceptions import ValidationError
+from datetime import date
 
 class UserRegistrationForm(UserCreationForm):
     class Meta:
@@ -46,6 +48,35 @@ class UserRegistrationForm(UserCreationForm):
             ),
             Submit('submit', 'Sign Up', css_class='btn btn-primary mt-3')
         )
+    # ✅ Validation: first_name only letters
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name.isalpha():
+            raise ValidationError("First name must contain only letters.")
+        return first_name
+
+    # ✅ Validation: last_name only letters
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if not last_name.isalpha():
+            raise ValidationError("Last name must contain only letters.")
+        return last_name
+
+    # ✅ Validation: phone_number only numbers
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        if not phone.isdigit():
+            raise ValidationError("Phone number must contain only digits.")
+        if len(phone) < 7 or len(phone) > 15:
+            raise ValidationError("Phone number must be between 7 and 15 digits.")
+        return phone
+
+    # ✅ Validation: date_of_birth must be in the past (not future)
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if dob and dob > date.today():
+            raise ValidationError("Date of birth cannot be in the future.")
+        return dob
 
 
 # forms.py
@@ -65,11 +96,7 @@ class EmailLoginForm(AuthenticationForm):
 
 
 
-# forms.py
-from django import forms
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Row, Column
-from .models import User
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -103,9 +130,37 @@ class ProfileForm(forms.ModelForm):
             ),
             'address',
             Row(
-                Column('user_type', css_class='col-md-6'),
                 Column('profile_picture', css_class='col-md-6'),
             ),
             Submit('save', 'Save Changes', css_class='btn btn-primary mt-3')
         )
 
+    # ✅ Validation: first_name only letters
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if not first_name.isalpha():
+            raise ValidationError("First name must contain only letters.")
+        return first_name
+
+    # ✅ Validation: last_name only letters
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if not last_name.isalpha():
+            raise ValidationError("Last name must contain only letters.")
+        return last_name
+
+    # ✅ Validation: phone_number only numbers
+    def clean_phone_number(self):
+        phone = self.cleaned_data.get('phone_number')
+        if not phone.isdigit():
+            raise ValidationError("Phone number must contain only digits.")
+        if len(phone) < 7 or len(phone) > 15:
+            raise ValidationError("Phone number must be between 7 and 15 digits.")
+        return phone
+
+    # ✅ Validation: date_of_birth must be in the past (not future)
+    def clean_date_of_birth(self):
+        dob = self.cleaned_data.get('date_of_birth')
+        if dob and dob > date.today():
+            raise ValidationError("Date of birth cannot be in the future.")
+        return dob

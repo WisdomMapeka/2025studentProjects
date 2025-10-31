@@ -3,6 +3,8 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column
 from .models import Booking
+from django.core.exceptions import ValidationError
+from datetime import date
 
 class BookingForm(forms.ModelForm):
     class Meta:
@@ -37,3 +39,9 @@ class BookingForm(forms.ModelForm):
             'special_requirements',
             Submit('submit', 'Book Now', css_class='btn btn-primary mt-3')
         )
+    
+    def clean_booking_date(self):
+        booking_date = self.cleaned_data.get('booking_date')
+        if booking_date and booking_date < date.today():
+            raise ValidationError("Booking date cannot be in the past.")
+        return booking_date
