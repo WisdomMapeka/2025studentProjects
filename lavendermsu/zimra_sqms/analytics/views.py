@@ -109,18 +109,25 @@ def bookings_timeseries(filters):
     ).order_by('booking_date')
     
     # Create complete date range
+    # Convert string dates to datetime.date objects if they're strings
+    if isinstance(filters['start_date'], str):
+        filters['start_date'] = datetime.datetime.strptime(filters['start_date'], '%Y-%m-%d').date()
+
+    if isinstance(filters['end_date'], str):
+        filters['end_date'] = datetime.datetime.strptime(filters['end_date'], '%Y-%m-%d').date()
+
     date_range = []
     current_date = filters['start_date']
     while current_date <= filters['end_date']:
         date_range.append(current_date)
         current_date += datetime.timedelta(days=1)
-    
+
     # Map counts to dates
     count_map = {item['booking_date']: item['count'] for item in timeseries_data}
     counts = [count_map.get(date, 0) for date in date_range]
-    
+
     labels = [date.strftime('%Y-%m-%d') for date in date_range]
-    
+
     return {
         'labels': labels,
         'data': counts,
